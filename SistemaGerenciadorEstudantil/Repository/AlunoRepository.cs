@@ -94,6 +94,25 @@ namespace SistemaGerenciadorEstudantil.Repository
                 db.Entry(aluno).State = EntityState.Modified;
                 db.SaveChanges();
                 DeleteDisciplinasAluno(aluno);
+                PostDisciplinasAluno(aluno);
+
+
+                    /*
+                    var disciplinasAlunos = new DisciplinasAlunos();                    
+
+                    disciplinasAlunos.AlunoID_FK = aluno.AlunoId;
+                    disciplinasAlunos.DisciplinaID_FK = aluno.DisciplinasAlunos.FirstOrDefault().DisciplinaID_FK;
+                    disciplinasAlunos.Nota1 = aluno.DisciplinasAlunos.FirstOrDefault().Nota1;
+                    disciplinasAlunos.Nota2 = aluno.DisciplinasAlunos.FirstOrDefault().Nota2;
+                    disciplinasAlunos.MediaFinal = aluno.DisciplinasAlunos.FirstOrDefault().MediaFinal;
+
+                    DeleteDisciplinasAluno(aluno);
+
+
+                    aluno.DisciplinasAlunos.Add(disciplinasAlunos);
+                    db.DisciplinasAlunos.Add(disciplinasAlunos);
+                    db.SaveChanges();
+                */
                 // PostDeleteDisciplinasAluno(aluno);
                 return aluno;
             }
@@ -108,16 +127,31 @@ namespace SistemaGerenciadorEstudantil.Repository
         {
             try
             {
-                var disciplinaAluno = (aluno.AlunoId);
+
+                var disciplinaAluno = GetDisciplinaAluno(aluno.AlunoId);
+                var discplinaAlunoTemp = aluno.DisciplinasAlunos;
+
+
                 if (disciplinaAluno != null)
-                    foreach (var item in aluno.DisciplinasAlunos)
+                { 
+                    
+                    foreach (var item in disciplinaAluno)
                     {
-                        db.DisciplinasAlunos.Remove(item);
+                        if(aluno.DisciplinasAlunos.LastOrDefault().DisciplinaID_FK==item.DisciplinaID_FK)
+                            
+                          { db.DisciplinasAlunos.Remove(item); }
+                     
+                        db.SaveChanges();
                     }
-                db.SaveChanges();
+                    
+                    
+              
+                }
+
+     
             }
-            catch (Exception e)
-            {
+            
+            catch (Exception e) { 
                 throw new Exception(e.Message);
             }
         }
@@ -129,15 +163,17 @@ namespace SistemaGerenciadorEstudantil.Repository
 
         public void PostDisciplinasAluno(Aluno aluno)
         {
-            foreach (var item in aluno.DisciplinasAlunos.ToList())
-            {
+        
 
                 try
                 {
-                    var discplinaAluno = new DisciplinasAlunos();
-                    discplinaAluno.Id = item.Id;
-                    discplinaAluno.DisciplinaID_FK = item.DisciplinaID_FK;
-                    db.DisciplinasAlunos.Add(discplinaAluno);
+                var discplinaAluno = new DisciplinasAlunos();
+                discplinaAluno.AlunoID_FK = aluno.AlunoId; ;
+                discplinaAluno.DisciplinaID_FK = aluno.DisciplinasAlunos.LastOrDefault(). DisciplinaID_FK;
+                discplinaAluno.Nota1 = aluno.DisciplinasAlunos.LastOrDefault().Nota1;
+                discplinaAluno.Nota2 = aluno.DisciplinasAlunos.LastOrDefault().Nota2;
+                discplinaAluno.MediaFinal = aluno.DisciplinasAlunos.LastOrDefault().MediaFinal;
+                db.DisciplinasAlunos.Add(discplinaAluno);
 
                     db.SaveChanges();
                 }
@@ -148,14 +184,14 @@ namespace SistemaGerenciadorEstudantil.Repository
                 }
 
 
-            }
+            
 
         }
         public List<DisciplinasAlunos> GetDisciplinaAluno(int AlunoId)
         {
             try
             {
-                return db.DisciplinasAlunos.Where(t => t.AlunoID_FK == AlunoId).ToList();
+                    return db.DisciplinasAlunos.Where(t => t.AlunoID_FK == AlunoId).ToList();
 
             }
             catch (Exception e)
